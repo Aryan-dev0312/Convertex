@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConvertX – Web-Based File Converter & PDF/Image Toolkit</title>
+  <meta name="description" content="100% private, client-side web toolkit to convert, compress, merge, split, rotate, watermark, and manage PDF and image files in your browser.">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- External CDN Libraries (Client-side only) -->
+  <!-- 1. pdf-lib: PDF manipulation (merge, split, remove, rotate, watermark, page numbers) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.9/pdf-lib.min.js"></script>
+
+  <!-- 2. pdf.js: PDF rendering & thumbnail generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- 3. jsPDF: Client-side PDF generation from text/images -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- 4. browser-image-compression: Fast image compression in browser -->
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+
+  <!-- 5. JSZip: Create ZIP packages for multi-file downloads -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- 6. QRCode.js: Client-side QR code generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#home" class="nav-brand" aria-label="ConvertX Home">
+        <div class="brand-icon">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </div>
+        <span class="brand-text">Convert<span class="brand-accent">X</span></span>
+        <span class="brand-badge">Local & Private</span>
+      </a>
+
+      <nav class="nav-links" id="nav-links">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#tools" class="nav-link">Tools</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#about" class="nav-link">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Dark Mode Toggle -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark/light mode" title="Switch Theme">
+          <i class="fa-solid fa-moon moon-icon"></i>
+          <i class="fa-solid fa-sun sun-icon"></i>
+        </button>
+
+        <a href="#tools" class="btn btn-primary nav-cta">
+          <i class="fa-solid fa-toolbox"></i>
+          <span>All Tools</span>
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+      <div class="container hero-container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>100% Private – Files never leave your browser</span>
+          </div>
+
+          <h1 class="hero-title">
+            Convert, Compress & Manage Your Files <span class="highlight">in Seconds</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            A free, client-side toolkit for all your PDF and image needs. No file uploads to external servers, no subscriptions, zero data storage — everything runs directly inside your device's memory.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="#tools" class="btn btn-primary btn-lg" id="get-started-btn">
+              <i class="fa-solid fa-bolt"></i> Get Started
+            </a>
+            <a href="#how-it-works" class="btn btn-outline btn-lg">
+              <i class="fa-solid fa-circle-question"></i> How It Works
+            </a>
+          </div>
+
+          <!-- Feature Highlights Row -->
+          <div class="hero-highlights">
+            <div class="highlight-item">
+              <i class="fa-solid fa-lock"></i>
+              <span>Zero Server Uploads</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fa-solid fa-gauge-high"></i>
+              <span>Instant Processing</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fa-solid fa-infinity"></i>
+              <span>No File Size Trap</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fa-solid fa-laptop-code"></i>
+              <span>100% Client-Side</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active Tool Workspace (Panel / Modal Workspace) -->
+    <section class="workspace-section hidden" id="tool-workspace" aria-labelledby="workspace-title">
+      <div class="container">
+        <div class="workspace-card">
+          <!-- Workspace Header -->
+          <div class="workspace-header">
+            <div class="workspace-meta">
+              <button id="close-workspace-btn" class="btn btn-ghost" title="Back to All Tools" aria-label="Back to All Tools">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back to Tools</span>
+              </button>
+              <div class="workspace-title-box">
+                <div class="workspace-tool-icon" id="ws-tool-icon">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div>
+                  <h2 class="workspace-title" id="workspace-title">Tool Name</h2>
+                  <p class="workspace-desc" id="workspace-desc">Tool description goes here.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="workspace-actions">
+              <button id="reset-tool-btn" class="btn btn-outline btn-sm" title="Clear and reset this tool">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Dropzone -->
+          <div class="dropzone" id="dropzone" tabindex="0" role="region" aria-label="File upload area">
+            <input type="file" id="file-input" class="file-input-hidden" multiple aria-label="Upload files">
+            <div class="dropzone-inner">
+              <div class="dropzone-icon">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <h3 class="dropzone-title">Drag & drop your files here</h3>
+              <p class="dropzone-sub">or click anywhere to browse from your computer</p>
+              <div class="dropzone-info" id="dropzone-info">
+                Supports: PDF, JPG, PNG, WEBP (Up to 100MB per file)
+              </div>
+              <button type="button" class="btn btn-outline btn-sm dropzone-browse-btn" id="browse-btn">
+                <i class="fa-regular fa-folder-open"></i> Browse Files
+              </button>
+            </div>
+          </div>
+
+          <!-- Selected Files Staging List -->
+          <div class="files-staging hidden" id="files-staging">
+            <div class="staging-header">
+              <div class="staging-title">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Selected Files (<span id="file-count">0</span>)</span>
+                <span class="staging-total-size" id="total-file-size">0 KB</span>
+              </div>
+              <div class="staging-actions">
+                <button type="button" class="btn btn-ghost btn-sm" id="add-more-files-btn">
+                  <i class="fa-solid fa-plus"></i> Add More
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm text-danger" id="clear-all-files-btn">
+                  <i class="fa-regular fa-trash-can"></i> Clear All
+                </button>
+              </div>
+            </div>
+
+            <!-- List or Grid of Files / Pages -->
+            <div class="files-list" id="files-list" role="list"></div>
+          </div>
+
+          <!-- Dynamic Options Panel for Active Tool -->
+          <div class="tool-options-panel" id="tool-options-panel">
+            <!-- Injected via JavaScript based on active tool -->
+          </div>
+
+          <!-- Progress Bar & Status Indicator -->
+          <div class="progress-container hidden" id="progress-container" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-header">
+              <span class="progress-status" id="progress-status">Processing files...</span>
+              <span class="progress-percent" id="progress-percent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+
+          <!-- Action Buttons Bar -->
+          <div class="workspace-footer" id="workspace-footer">
+            <button type="button" class="btn btn-primary btn-lg" id="process-btn">
+              <i class="fa-solid fa-gear"></i>
+              <span id="process-btn-text">Process File</span>
+            </button>
+          </div>
+
+          <!-- Results & Download View -->
+          <div class="results-container hidden" id="results-container">
+            <div class="result-success-badge">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 class="result-title" id="result-title">Task Completed Successfully!</h3>
+            <p class="result-desc" id="result-desc">Your file has been generated entirely in your browser.</p>
+
+            <div class="result-stats" id="result-stats">
+              <!-- Result stats injected via JS (e.g. sizes, savings, page counts) -->
+            </div>
+
+            <div class="result-actions">
+              <a href="#" id="download-result-btn" class="btn btn-primary btn-lg" download>
+                <i class="fa-solid fa-download"></i> Download Result
+              </a>
+              <button type="button" class="btn btn-outline btn-lg" id="convert-another-btn">
+                <i class="fa-solid fa-arrow-rotate-right"></i> Process Another File
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Tools Section: Search, Filters & Grid -->
+    <section class="tools-section" id="tools">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">Toolkit</span>
+          <h2 class="section-title">Explore All 14 ConvertX Tools</h2>
+          <p class="section-subtitle">
+            Choose a tool below to instantly process files client-side. Fast, zero logs, and privacy guaranteed.
+          </p>
+        </div>
+
+        <!-- Search Bar and Category Filters -->
+        <div class="tools-filter-bar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input 
+              type="text" 
+              id="tool-search-input" 
+              placeholder="Search tools (e.g., merge, compress, split, watermark)..." 
+              aria-label="Search tools"
+              autocomplete="off"
+            >
+            <button id="clear-search-btn" class="clear-search-btn hidden" aria-label="Clear search">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="category-tabs" role="tablist" aria-label="Tool Categories">
+            <button class="category-tab active" data-category="all" role="tab" aria-selected="true">
+              All Tools <span class="tab-badge" id="badge-all">14</span>
+            </button>
+            <button class="category-tab" data-category="pdf" role="tab" aria-selected="false">
+              <i class="fa-solid fa-file-pdf"></i> PDF Tools <span class="tab-badge" id="badge-pdf">8</span>
+            </button>
+            <button class="category-tab" data-category="image" role="tab" aria-selected="false">
+              <i class="fa-solid fa-image"></i> Image Tools <span class="tab-badge" id="badge-image">4</span>
+            </button>
+            <button class="category-tab" data-category="utility" role="tab" aria-selected="false">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Utilities <span class="tab-badge" id="badge-utility">2</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tool Count Status -->
+        <div class="tools-status">
+          <span id="tools-count-text">Showing all 14 tools</span>
+        </div>
+
+        <!-- Tool Cards Grid -->
+        <div class="tools-grid" id="tools-grid">
+
+          <!-- 1. JPG/PNG to PDF -->
+          <div class="tool-card" data-tool="img-to-pdf" data-category="pdf" tabindex="0" role="button" aria-label="Open JPG/PNG to PDF tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-images"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">JPG / PNG to PDF</h3>
+            <p class="tool-card-desc">Convert multiple images into a single organized PDF with custom page size and orientation.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Multi-image</span>
+              <span class="tool-tag">Reorder</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 2. Merge PDF -->
+          <div class="tool-card" data-tool="merge-pdf" data-category="pdf" tabindex="0" role="button" aria-label="Open Merge PDF tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-object-group"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">Merge PDF</h3>
+            <p class="tool-card-desc">Combine multiple PDF documents into a single consolidated PDF in any order you choose.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Batch Merge</span>
+              <span class="tool-tag">Drag & Drop</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 3. Remove Pages from PDF -->
+          <div class="tool-card" data-tool="remove-pages" data-category="pdf" tabindex="0" role="button" aria-label="Open Remove Pages from PDF tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-file-circle-minus"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">Remove Pages from PDF</h3>
+            <p class="tool-card-desc">View page thumbnails, select unwanted pages or specify a page range (e.g. 2, 4-6) to delete.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Visual Thumbnails</span>
+              <span class="tool-tag">Range Syntax</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 4. Compress Image -->
+          <div class="tool-card" data-tool="compress-image" data-category="image" tabindex="0" role="button" aria-label="Open Compress Image tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-file-zipper"></i>
+            </div>
+            <div class="tool-card-badge">Image</div>
+            <h3 class="tool-card-title">Compress Image</h3>
+            <p class="tool-card-desc">Reduce JPG, PNG, and WEBP file size with quality slider, showing real-time size savings.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Quality Slider</span>
+              <span class="tool-tag">% Savings</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 5. PDF to JPG -->
+          <div class="tool-card" data-tool="pdf-to-img" data-category="pdf" tabindex="0" role="button" aria-label="Open PDF to JPG tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-file-image"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">PDF to JPG</h3>
+            <p class="tool-card-desc">Render each PDF page into high-res images. Preview pages and download individually or as a ZIP.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">High-Res Render</span>
+              <span class="tool-tag">ZIP Download</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 6. Split PDF -->
+          <div class="tool-card" data-tool="split-pdf" data-category="pdf" tabindex="0" role="button" aria-label="Open Split PDF tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-scissors"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">Split PDF</h3>
+            <p class="tool-card-desc">Extract specific page ranges into a new document or split every page into separate individual PDFs.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Extract Range</span>
+              <span class="tool-tag">All-Pages Split</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 7. Rotate PDF Pages -->
+          <div class="tool-card" data-tool="rotate-pdf" data-category="pdf" tabindex="0" role="button" aria-label="Open Rotate PDF Pages tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-rotate"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">Rotate PDF Pages</h3>
+            <p class="tool-card-desc">Rotate entire document or individual pages by 90°, 180°, or 270° with live visual feedback.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">90° / 180° / 270°</span>
+              <span class="tool-tag">Per-page</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 8. Reorder PDF Pages -->
+          <div class="tool-card" data-tool="reorder-pdf" data-category="pdf" tabindex="0" role="button" aria-label="Open Reorder PDF Pages tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-arrow-down-1-9"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">Reorder PDF Pages</h3>
+            <p class="tool-card-desc">Rearrange pages inside your PDF with intuitive drag-and-drop thumbnail cards.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Visual Drag & Drop</span>
+              <span class="tool-tag">Order Badges</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 9. Image Format Converter -->
+          <div class="tool-card" data-tool="convert-img" data-category="image" tabindex="0" role="button" aria-label="Open Image Format Converter tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-arrows-split-up-and-left"></i>
+            </div>
+            <div class="tool-card-badge">Image</div>
+            <h3 class="tool-card-title">Image Format Converter</h3>
+            <p class="tool-card-desc">Convert seamlessly between JPG, PNG, and WEBP formats with custom quality settings.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">JPG ↔ PNG ↔ WEBP</span>
+              <span class="tool-tag">Batch Mode</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 10. Resize Image -->
+          <div class="tool-card" data-tool="resize-img" data-category="image" tabindex="0" role="button" aria-label="Open Resize Image tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            </div>
+            <div class="tool-card-badge">Image</div>
+            <h3 class="tool-card-title">Resize Image</h3>
+            <p class="tool-card-desc">Change image dimensions by exact pixels or percentage while preserving original aspect ratio.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Pixel / Percentage</span>
+              <span class="tool-tag">Lock Ratio</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 11. Add Watermark to PDF -->
+          <div class="tool-card" data-tool="watermark-pdf" data-category="pdf" tabindex="0" role="button" aria-label="Open Add Watermark to PDF tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-stamp"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">Add Watermark to PDF</h3>
+            <p class="tool-card-desc">Stamp custom text watermarks across pages with controllable opacity, rotation, and colors.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Opacity & Angles</span>
+              <span class="tool-tag">Live Preview</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 12. Add Page Numbers to PDF -->
+          <div class="tool-card" data-tool="page-numbers-pdf" data-category="pdf" tabindex="0" role="button" aria-label="Open Add Page Numbers to PDF tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-hashtag"></i>
+            </div>
+            <div class="tool-card-badge">PDF</div>
+            <h3 class="tool-card-title">Add Page Numbers to PDF</h3>
+            <p class="tool-card-desc">Insert clean page numbers into your PDF. Choose numbering format, font size, and positions.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Page X of Y</span>
+              <span class="tool-tag">Position Control</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 13. Text to PDF -->
+          <div class="tool-card" data-tool="text-to-pdf" data-category="utility" tabindex="0" role="button" aria-label="Open Text to PDF tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-file-lines"></i>
+            </div>
+            <div class="tool-card-badge">Utility</div>
+            <h3 class="tool-card-title">Text to PDF</h3>
+            <p class="tool-card-desc">Type, paste or import plain text, select formatting, and export cleanly paginated PDF documents.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Text Editor</span>
+              <span class="tool-tag">Auto Pagination</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+          <!-- 14. Image to Base64 & QR Code Generator -->
+          <div class="tool-card" data-tool="qr-base64" data-category="utility" tabindex="0" role="button" aria-label="Open Image to Base64 & QR Generator tool">
+            <div class="tool-card-icon">
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <div class="tool-card-badge">Utility</div>
+            <h3 class="tool-card-title">Base64 & QR Code</h3>
+            <p class="tool-card-desc">Encode images into Base64 strings / Data URIs and generate high-res QR codes for any text or link.</p>
+            <div class="tool-card-footer">
+              <span class="tool-tag">Image ↔ Base64</span>
+              <span class="tool-tag">PNG QR Codes</span>
+              <span class="tool-link">Use Tool <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- No search results placeholder -->
+        <div class="no-results hidden" id="no-results">
+          <i class="fa-solid fa-face-meh"></i>
+          <h3>No matching tools found</h3>
+          <p>Try searching with another keyword or browse all available tools.</p>
+          <button class="btn btn-outline btn-sm" id="reset-search-btn">View All Tools</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section" id="how-it-works">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">Simple & Fast</span>
+          <h2 class="section-title">How ConvertX Works in 3 Steps</h2>
+          <p class="section-subtitle">No software installation, no account creation, and completely safe.</p>
+        </div>
+
+        <div class="steps-grid">
+          <!-- Step 1 -->
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-icon">
+              <i class="fa-solid fa-upload"></i>
+            </div>
+            <h3 class="step-title">Upload Your Files</h3>
+            <p class="step-desc">
+              Select or drag and drop your PDFs or images directly into the browser. Your files stay strictly in local memory and are never uploaded to any server.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-icon">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+            <h3 class="step-title">Configure & Convert</h3>
+            <p class="step-desc">
+              Fine-tune settings like quality, page order, rotations, watermark text, or dimensions. ConvertX processes everything client-side with WebAssembly and Canvas.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-icon">
+              <i class="fa-solid fa-circle-down"></i>
+            </div>
+            <h3 class="step-title">Instant Download</h3>
+            <p class="step-desc">
+              Click download to save your new PDF, optimized image, or ZIP archive directly to your computer. Zero waiting time, zero bandwidth waste.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+      <div class="container">
+        <div class="about-card">
+          <div class="about-grid">
+            <div class="about-text">
+              <span class="section-tag">Privacy First</span>
+              <h2 class="section-title">Why Client-Side Processing Matters</h2>
+              <p>
+                Traditional online converters require you to upload confidential documents, tax forms, photos, and IDs to an unknown remote server. That poses serious privacy and security risks.
+              </p>
+              <p>
+                <strong>ConvertX changes the game:</strong> By utilizing modern Web APIs (WebAssembly, HTML5 Canvas, Blob URLs, and FileReader), all cryptographic calculations and rendering occur locally on your machine.
+              </p>
+              <div class="about-features-list">
+                <div class="about-feature">
+                  <i class="fa-solid fa-check"></i>
+                  <span>Zero server logs, zero data breaches</span>
+                </div>
+                <div class="about-feature">
+                  <i class="fa-solid fa-check"></i>
+                  <span>Works even on poor or offline networks</span>
+                </div>
+                <div class="about-feature">
+                  <i class="fa-solid fa-check"></i>
+                  <span>No file size limits or paywalls</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="about-tech-box">
+              <h3 class="tech-box-title">Engineered With Open Web Tech</h3>
+              <ul class="tech-list">
+                <li>
+                  <strong>pdf-lib:</strong> Merge, split, rotate, watermark & page-numbering engine.
+                </li>
+                <li>
+                  <strong>pdf.js (Mozilla):</strong> High-fidelity PDF rendering and thumbnail canvas generator.
+                </li>
+                <li>
+                  <strong>jsPDF:</strong> In-browser vector document compilation from text and graphics.
+                </li>
+                <li>
+                  <strong>browser-image-compression:</strong> Multi-threaded canvas image optimization.
+                </li>
+                <li>
+                  <strong>JSZip:</strong> Client-side compressed archive packaging.
+                </li>
+                <li>
+                  <strong>Pure Vanilla JS:</strong> Zero frameworks, fast load times, and clean architecture.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand-icon">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </div>
+          <span class="brand-text">Convert<span class="brand-accent">X</span></span>
+          <p class="footer-tagline">100% Client-Side PDF & Image Toolkit. Safe, fast, and completely free forever.</p>
+        </div>
+
+        <div class="footer-links-group">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#tools">All Tools</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#about">About Privacy</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-group">
+          <h4>Popular Tools</h4>
+          <ul>
+            <li><a href="#tools" onclick="ConvertX.openTool('img-to-pdf')">Images to PDF</a></li>
+            <li><a href="#tools" onclick="ConvertX.openTool('merge-pdf')">Merge PDF</a></li>
+            <li><a href="#tools" onclick="ConvertX.openTool('compress-image')">Compress Image</a></li>
+            <li><a href="#tools" onclick="ConvertX.openTool('pdf-to-img')">PDF to JPG</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          &copy; <span id="current-year">2026</span> ConvertX. Built with HTML5, CSS3 & Vanilla JavaScript.
+        </p>
+        <p class="footer-author">
+          Made by <span class="author-name">Your Name</span> • Project Viva Edition
+        </p>
+        <button id="back-to-top" class="back-to-top-btn" title="Back to top" aria-label="Back to top">
+          <i class="fa-solid fa-arrow-up"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification System Container -->
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Custom Application Script -->
+  <script src="script.js"></script>
+</body>
+</html>
